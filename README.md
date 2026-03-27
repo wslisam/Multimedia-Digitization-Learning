@@ -2,6 +2,8 @@ Teaching Tool : Multimedia Digitization - Bitmaps, Audio, and Compression
 
 # Multimedia Digitization Learning App 🎓
 
+<img width="1325" height="984" alt="image" src="https://github.com/user-attachments/assets/6dd5484a-4a7a-47a2-94cb-79c44fc30944" />
+
 This tool is designed to help you understand how computers take real-world sights and sounds and turn them into digital data (0s and 1s). 
 
 ## 🌟 How to Use This App for Learning
