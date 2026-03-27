@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multimedia Digitization | 多媒體數碼化</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8fafc; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.4s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        canvas { image-rendering: pixelated; }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        .tip-box {
+            border-left: 4px solid #f59e0b;
+            background-color: #fffbeb;
+        }
+        
+        /* Emphasis instead of italics */
+        .highlight-text {
+            color: #4f46e5;
+            font-weight: 600;
+            background-color: #e0e7ff;
+            padding: 0 4px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="text-slate-800 h-screen flex flex-col overflow-hidden">
+
+    <!-- Header -->
+    <header class="bg-indigo-700 text-white shadow-md z-20 relative">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="bg-white/20 p-2 rounded-lg">
+                    <i class="fa-solid fa-microchip text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-wide" data-i18n="appTitle">Multimedia Digitization</h1>
+                    <p class="text-xs text-indigo-200" data-i18n="appSubtitle">Bitmaps, Audio, and Compression</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-4 text-sm">
+                <span class="text-indigo-100 font-medium" data-i18n="author">Created by Sam Li</span>
+                <button onclick="toggleLanguage()" class="bg-white text-indigo-700 hover:bg-indigo-50 px-4 py-1.5 rounded-full transition-colors font-bold shadow-sm flex items-center gap-2">
+                    <i class="fa-solid fa-language"></i>
+                    <span id="langBtn">中文</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Layout -->
+    <div class="flex-1 flex overflow-hidden max-w-7xl mx-auto w-full bg-white shadow-xl">
+        <!-- Sidebar Navigation -->
+        <nav class="w-64 bg-slate-50 border-r border-slate-200 z-10 flex flex-col py-6 overflow-y-auto shrink-0">
+            <div class="px-6 mb-4 text-xs font-bold text-slate-400 uppercase tracking-wider" data-i18n="navSection1">Learning Path</div>
+            
+            <button class="tab-btn active text-left px-6 py-3.5 hover:bg-indigo-50 text-indigo-700 font-semibold border-l-4 border-indigo-600 transition-all flex items-center group" onclick="switchTab('intro')">
+                <div class="w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center mr-3 group-hover:bg-indigo-200 transition-colors">
+                    <i class="fa-solid fa-book-open"></i>
+                </div>
+                <span data-i18n="navIntro">Introduction</span>
+            </button>
+            
+            <button class="tab-btn text-left px-6 py-3.5 hover:bg-indigo-50 text-slate-600 border-l-4 border-transparent transition-all flex items-center group" onclick="switchTab('audio')">
+                <div class="w-8 h-8 rounded-full bg-slate-200 text-slate-500 flex items-center justify-center mr-3 group-hover:bg-indigo-100 group-hover:text-indigo-600 transition-colors">
+                    <i class="fa-solid fa-wave-square"></i>
+                </div>
+                <span data-i18n="navAudio">Audio Digitization</span>
+            </button>
+            
+            <button class="tab-btn text-left px-6 py-3.5 hover:bg-indigo-50 text-slate-600 border-l-4 border-transparent transition-all flex items-center group" onclick="switchTab('image')">
+                <div class="w-8 h-8 rounded-full bg-slate-200 text-slate-500 flex items-center justify-center mr-3 group-hover:bg-indigo-100 group-hover:text-indigo-600 transition-colors">
+                    <i class="fa-solid fa-image"></i>
+                </div>
+                <span data-i18n="navImage">Image Digitization</span>
+            </button>
+            
+            <div class="px-6 mt-6 mb-4 text-xs font-bold text-slate-400 uppercase tracking-wider" data-i18n="navSection2">Tools & Concepts</div>
+            
+            <button class="tab-btn text-left px-6 py-3.5 hover:bg-indigo-50 text-slate-600 border-l-4 border-transparent transition-all flex items-center group" onclick="switchTab('calc')">
+                <div class="w-8 h-8 rounded-full bg-slate-200 text-slate-500 flex items-center justify-center mr-3 group-hover:bg-indigo-100 group-hover:text-indigo-600 transition-colors">
+                    <i class="fa-solid fa-calculator"></i>
+                </div>
+                <span data-i18n="navCalc">File Size Calculator</span>
+            </button>
+            
+            <button class="tab-btn text-left px-6 py-3.5 hover:bg-indigo-50 text-slate-600 border-l-4 border-transparent transition-all flex items-center group" onclick="switchTab('formats')">
+                <div class="w-8 h-8 rounded-full bg-slate-200 text-slate-500 flex items-center justify-center mr-3 group-hover:bg-indigo-100 group-hover:text-indigo-600 transition-colors">
+                    <i class="fa-solid fa-file-zipper"></i>
+                </div>
+                <span data-i18n="navFormats">File Formats</span>
+            </button>
+        </nav>
+
+        <!-- Content Area -->
+        <main class="flex-1 overflow-y-auto p-8 lg:p-10 bg-white">
+            
+            <!-- Intro Tab -->
+            <div id="intro" class="tab-content active max-w-4xl mx-auto">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="bg-indigo-100 p-3 rounded-xl text-indigo-600"><i class="fa-solid fa-book-open text-2xl"></i></div>
+                    <h2 class="text-3xl font-bold text-slate-800" data-i18n="introTitle">What is Digitization?</h2>
+                </div>
+                
+                <div class="prose prose-slate max-w-none">
+                    <p class="text-lg text-slate-600 leading-relaxed mb-8" data-i18n="introP1">
+                        Computers only understand binary data (0s and 1s). However, the real world is <strong>analog</strong>—continuous and infinite. For example, a violin string vibrates continuously, and a painted canvas has infinite variations of color. <strong>Digitization</strong> is the process of converting these continuous analog signals into discrete, finite digital numbers that a computer can store and process.
+                    </p>
+
+                    <div class="bg-slate-50 border border-slate-200 rounded-2xl p-6 mb-8">
+                        <h3 class="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
+                            <i class="fa-solid fa-gears text-indigo-500"></i>
+                            <span data-i18n="twoSteps">The Two Core Steps of Digitization</span>
+                        </h3>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Sampling -->
+                            <div class="bg-white p-5 rounded-xl border border-indigo-100 shadow-sm relative overflow-hidden group hover:border-indigo-300 transition-colors">
+                                <div class="absolute top-0 right-0 bg-indigo-500 text-white w-8 h-8 flex items-center justify-center rounded-bl-xl font-bold">1</div>
+                                <h4 class="font-bold text-indigo-700 text-lg mb-2"><i class="fa-solid fa-ruler-horizontal mr-2"></i><span data-i18n="sampling">Sampling</span></h4>
+                                <p class="text-slate-600 text-sm mb-3" data-i18n="samplingDesc">
+                                    Taking snapshots or measurements of the analog signal at regular intervals. This breaks a continuous signal into discrete pieces.
+                                </p>
+                                <ul class="text-sm text-slate-500 list-disc pl-5 space-y-2">
+                                    <li data-i18n="samplingEx1"><strong>Audio:</strong> Measuring sound waves over <span class="highlight-text">time</span> (e.g., taking 44,100 measurements every second).</li>
+                                    <li data-i18n="samplingEx2"><strong>Images:</strong> Dividing a picture into a grid of pixels over <span class="highlight-text">space</span>.</li>
+                                </ul>
+                            </div>
+                            
+                            <!-- Quantization -->
+                            <div class="bg-white p-5 rounded-xl border border-purple-100 shadow-sm relative overflow-hidden group hover:border-purple-300 transition-colors">
+                                <div class="absolute top-0 right-0 bg-purple-500 text-white w-8 h-8 flex items-center justify-center rounded-bl-xl font-bold">2</div>
+                                <h4 class="font-bold text-purple-700 text-lg mb-2"><i class="fa-solid fa-stairs mr-2"></i><span data-i18n="quantization">Quantization</span></h4>
+                                <p class="text-slate-600 text-sm mb-3" data-i18n="quantizationDesc">
+                                    Assigning a specific, discrete numerical value to each sample based on available bits. This rounds exact values to the nearest available step.
+                                </p>
+                                <ul class="text-sm text-slate-500 list-disc pl-5 space-y-2">
+                                    <li data-i18n="quantEx1"><strong>Audio:</strong> Rounding the exact sound wave amplitude to the nearest available level (Bit Depth).</li>
+                                    <li data-i18n="quantEx2"><strong>Images:</strong> Assigning a specific binary code for a color out of a limited palette (Color Depth).</li>
+                                </ul>
+                                <div class="mt-3 bg-purple-50 p-3 rounded-lg text-sm text-purple-800 border border-purple-200" data-i18n="bitPatternRule">
+                                    <strong>Rule of Bits:</strong> <span class="highlight-text">n</span> bits can represent <span class="highlight-text">2<sup>n</sup></span> different patterns or levels. (e.g., 8 bits = 2<sup>8</sup> = 256 levels).
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Think Box -->
+                    <div class="tip-box p-5 rounded-xl shadow-sm mb-6">
+                        <div class="flex gap-4">
+                            <div class="text-amber-500 text-2xl mt-1"><i class="fa-regular fa-lightbulb"></i></div>
+                            <div>
+                                <h4 class="font-bold text-amber-800 mb-2" data-i18n="thinkBox1Title">Think & Discuss: Information Loss</h4>
+                                <p class="text-sm text-amber-900 mb-2" data-i18n="thinkBox1Desc">
+                                    Since we are only taking "snapshots" (sampling) and "rounding off" values (quantization), is the digital version exactly the same as the original analog signal? What happens if we sample too slowly, or use too few bits for quantization?
+                                </p>
+                                <p class="text-sm text-amber-800 font-medium bg-amber-100 p-2 rounded" data-i18n="thinkBox1Hint">
+                                    Let's explore the next tabs (Audio & Image) to see the visual effects of changing these settings!
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Audio Tab -->
+            <div id="audio" class="tab-content max-w-4xl mx-auto">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="bg-blue-100 p-3 rounded-xl text-blue-600"><i class="fa-solid fa-wave-square text-2xl"></i></div>
+                    <h2 class="text-3xl font-bold text-slate-800" data-i18n="audioTitle">Audio Digitization</h2>
+                </div>
+
+                <p class="text-lg text-slate-600 mb-6" data-i18n="audioIntro">
+                    Sound travels as continuous waves of air pressure. To store sound on a computer, we must measure the height (amplitude) of the wave at regular time intervals.
+                </p>
+
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 mb-8">
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                        <!-- Controls -->
+                        <div class="lg:col-span-5 space-y-6">
+                            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 shadow-inner">
+                                <div class="flex justify-between items-end mb-2">
+                                    <label class="font-bold text-slate-700" data-i18n="sampleRateLabel">Sampling Rate</label>
+                                    <span id="srValue" class="text-sm font-bold bg-blue-100 text-blue-800 px-3 py-1 rounded-full">20 Hz</span>
+                                </div>
+                                <p class="text-sm text-slate-600 mb-3" data-i18n="sampleRateHelp">How often we take a snapshot per second (Horizontal axis). Higher rate = captures faster changes in sound.</p>
+                                <input type="range" id="audioSampleRate" min="4" max="60" value="20" class="w-full h-2 bg-slate-300 rounded-lg appearance-none cursor-pointer accent-blue-600">
+                                <div class="flex justify-between text-xs font-semibold text-slate-500 mt-2">
+                                    <span data-i18n="low">Low (Fewer slices)</span>
+                                    <span data-i18n="high">High (More slices)</span>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 shadow-inner">
+                                <div class="flex justify-between items-end mb-2">
+                                    <label class="font-bold text-slate-700" data-i18n="bitDepthLabel">Bit Depth (Quantization)</label>
+                                    <span id="bdValue" class="text-sm font-bold bg-purple-100 text-purple-800 px-3 py-1 rounded-full">10 Levels</span>
+                                </div>
+                                <p class="text-sm text-slate-600 mb-3" data-i18n="bitDepthHelp">How many exact values are available to record the height (Vertical axis). Higher depth = more accurate volume levels.</p>
+                                <input type="range" id="audioBitDepth" min="2" max="30" value="10" class="w-full h-2 bg-slate-300 rounded-lg appearance-none cursor-pointer accent-purple-600">
+                                <div class="flex justify-between text-xs font-semibold text-slate-500 mt-2">
+                                    <span data-i18n="low">Low (Rough steps)</span>
+                                    <span data-i18n="high">High (Smooth steps)</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Visualization -->
+                        <div class="lg:col-span-7">
+                            <div class="bg-slate-900 rounded-xl p-4 flex flex-col items-center justify-center h-full relative overflow-hidden shadow-md">
+                                <div class="absolute top-4 left-4 flex flex-col gap-2 z-10">
+                                    <div class="flex items-center gap-2 text-sm font-medium text-white bg-black/60 px-3 py-1.5 rounded-lg backdrop-blur-sm">
+                                        <div class="w-4 h-1.5 bg-red-500 rounded-sm"></div> <span data-i18n="analogWave">Original Analog Wave</span>
+                                    </div>
+                                    <div class="flex items-center gap-2 text-sm font-medium text-white bg-black/60 px-3 py-1.5 rounded-lg backdrop-blur-sm">
+                                        <div class="w-4 h-4 bg-emerald-400 opacity-80 rounded-sm"></div> <span data-i18n="digitalSamples">Digital Samples</span>
+                                    </div>
+                                </div>
+                                <canvas id="audioCanvas" width="400" height="300" class="w-full max-w-md"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Think Box -->
+                <div class="tip-box p-5 rounded-xl shadow-sm">
+                    <div class="flex gap-4">
+                        <div class="text-amber-500 text-2xl mt-1"><i class="fa-solid fa-circle-question"></i></div>
+                        <div>
+                            <h4 class="font-bold text-amber-800 mb-2" data-i18n="thinkBox2Title">Student FAQ: Why not just set everything to maximum?</h4>
+                            <p class="text-sm text-amber-900 mb-3" data-i18n="thinkBox2Desc">
+                                If higher sampling rates and bit depths make the digital wave look exactly like the original analog wave, why don't we just use infinite rates and depths to get perfect quality?
+                            </p>
+                            <div class="bg-amber-100 p-3 rounded-lg border border-amber-200">
+                                <p class="text-sm text-amber-900 font-medium" data-i18n="thinkBox2Ans">
+                                    <strong>Answer: File Size!</strong> Every sample takes up bits. Higher rates = more samples per second. Higher bit depth = more bits used per sample. This leads to massive file sizes. We must find a balance between <span class="highlight-text">Quality</span> and <span class="highlight-text">Storage Space</span>.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Image Tab -->
+            <div id="image" class="tab-content max-w-4xl mx-auto">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="bg-emerald-100 p-3 rounded-xl text-emerald-600"><i class="fa-solid fa-image text-2xl"></i></div>
+                    <h2 class="text-3xl font-bold text-slate-800" data-i18n="imageTitle">Image Digitization</h2>
+                </div>
+
+                <p class="text-lg text-slate-600 mb-6" data-i18n="imageIntro">
+                    A real-world scene is continuous in space and color. To digitize an image, we place a grid over it (Sampling) and assign a single color value to each square, called a <strong>Pixel</strong> (Picture Element).
+                </p>
+
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 mb-8">
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                        <!-- Controls -->
+                        <div class="lg:col-span-5 space-y-6">
+                            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 shadow-inner">
+                                <div class="flex justify-between items-end mb-2">
+                                    <label class="font-bold text-slate-700" data-i18n="resolutionLabel">Resolution (Grid Size)</label>
+                                    <span id="resValue" class="text-sm font-bold bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full">32 x 32</span>
+                                </div>
+                                <p class="text-sm text-slate-600 mb-3" data-i18n="resolutionHelp">Determines how many pixels make up the image (Spatial Sampling). More pixels = finer detail.</p>
+                                <input type="range" id="imageRes" min="4" max="100" value="32" class="w-full h-2 bg-slate-300 rounded-lg appearance-none cursor-pointer accent-emerald-600">
+                                <div class="flex justify-between text-xs font-semibold text-slate-500 mt-2">
+                                    <span data-i18n="pixelated">Low (Pixelated)</span>
+                                    <span data-i18n="clear">High (Clear)</span>
+                                </div>
+                            </div>
+
+                            <div class="bg-amber-50 border border-amber-200 p-5 rounded-xl shadow-sm">
+                                <h4 class="font-bold text-amber-800 text-base mb-2 flex items-center gap-2">
+                                    <i class="fa-solid fa-palette"></i>
+                                    <span data-i18n="colorDepthTitle">What about Quantization?</span>
+                                </h4>
+                                <p class="text-sm text-amber-900 leading-relaxed" data-i18n="colorDepthDesc">
+                                    In images, quantization is called <strong>Color Depth (Bit Depth)</strong>. It determines how many bits are used to represent the color of a single pixel. <br><br>
+                                    <span class="highlight-text">1-bit</span> = 2<sup>1</sup> = 2 colors (Black & White)<br>
+                                    <span class="highlight-text">8-bit</span> = 2<sup>8</sup> = 256 colors<br>
+                                    <span class="highlight-text">24-bit</span> = 2<sup>24</sup> = 16.7 million colors (True Color)
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Visualization -->
+                        <div class="lg:col-span-7 flex justify-center">
+                            <div class="bg-slate-100 p-5 rounded-xl border border-slate-200 inline-block shadow-inner">
+                                <canvas id="imageCanvas" width="320" height="320" class="shadow-md bg-white border border-slate-300"></canvas>
+                                <p class="text-center text-sm font-medium text-slate-500 mt-4" data-i18n="imageSimCaption">Procedurally generated gradient circle showing pixelation</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Think Box -->
+                <div class="tip-box p-5 rounded-xl shadow-sm">
+                    <div class="flex gap-4">
+                        <div class="text-amber-500 text-2xl mt-1"><i class="fa-solid fa-magnifying-glass-chart"></i></div>
+                        <div>
+                            <h4 class="font-bold text-amber-800 mb-2" data-i18n="thinkBoxImageTitle">Think & Discuss: Calculating the Cost of Quality</h4>
+                            <p class="text-sm text-amber-900 mb-3" data-i18n="thinkBoxImageDesc">
+                                Imagine a modern smartphone photo. It might have a resolution of 4000 x 3000 pixels, and use 24-bit True Color. How many total bits is that? 
+                            </p>
+                            <div class="bg-amber-100 p-2 rounded border border-amber-200 inline-block">
+                                <p class="text-sm text-amber-800 font-medium" data-i18n="thinkBoxImageHint">
+                                    Let's head over to the "File Size Calculator" tab to find out exactly how to calculate this mathematically!
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Calculator Tab -->
+            <div id="calc" class="tab-content max-w-4xl mx-auto">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="bg-rose-100 p-3 rounded-xl text-rose-600"><i class="fa-solid fa-calculator text-2xl"></i></div>
+                    <h2 class="text-3xl font-bold text-slate-800" data-i18n="calcTitle">File Size Calculator</h2>
+                </div>
+                
+                <p class="text-lg text-slate-600 mb-6" data-i18n="calcIntro">
+                    Every digital sample requires bits to store. We can mathematically calculate the exact size of <strong>uncompressed</strong> raw data using simple formulas.
+                </p>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Image Calc -->
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col hover:border-emerald-300 transition-colors">
+                        <div class="flex items-center gap-2 mb-4">
+                            <i class="fa-solid fa-image text-emerald-600 text-xl"></i>
+                            <h3 class="text-xl font-bold text-slate-800" data-i18n="imageCalc">Bitmap Image Size</h3>
+                        </div>
+                        
+                        <div class="bg-slate-800 text-emerald-400 p-4 rounded-xl font-mono text-base mb-6 text-center shadow-inner font-bold tracking-wide">
+                            Size = Width × Height × Color Depth
+                        </div>
+                        
+                        <div class="space-y-5 flex-1">
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="text-sm font-bold text-slate-700 block mb-1" data-i18n="width">Width (px)</label>
+                                    <input type="number" id="calcImgW" value="1920" class="w-full border border-slate-300 p-3 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all shadow-sm">
+                                </div>
+                                <div>
+                                    <label class="text-sm font-bold text-slate-700 block mb-1" data-i18n="height">Height (px)</label>
+                                    <input type="number" id="calcImgH" value="1080" class="w-full border border-slate-300 p-3 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all shadow-sm">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="text-sm font-bold text-slate-700 block mb-1" data-i18n="colorDepthLabel">Color Depth (bits per pixel)</label>
+                                <select id="calcImgD" class="w-full border border-slate-300 p-3 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none bg-white shadow-sm cursor-pointer">
+                                    <option value="1">1-bit (2 colors)</option>
+                                    <option value="8">8-bit (256 colors)</option>
+                                    <option value="16">16-bit (High Color)</option>
+                                    <option value="24" selected>24-bit (True Color - RGB)</option>
+                                    <option value="32">32-bit (True Color + Alpha)</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-6 p-6 bg-emerald-50 border border-emerald-200 rounded-xl text-center relative overflow-hidden shadow-sm">
+                            <div class="absolute top-0 left-0 w-1.5 h-full bg-emerald-500"></div>
+                            <div class="text-sm text-emerald-800 font-bold uppercase tracking-wider mb-2" data-i18n="uncompressedSize">Uncompressed Size</div>
+                            <div id="imgResult" class="text-4xl font-black text-emerald-700">5.93 MB</div>
+                            <div id="imgBits" class="text-sm text-emerald-600 mt-2 font-mono font-medium">49,766,400 bits</div>
+                        </div>
+                    </div>
+
+                    <!-- Audio Calc -->
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col hover:border-blue-300 transition-colors">
+                        <div class="flex items-center gap-2 mb-4">
+                            <i class="fa-solid fa-music text-blue-600 text-xl"></i>
+                            <h3 class="text-xl font-bold text-slate-800" data-i18n="audioCalc">Audio File Size</h3>
+                        </div>
+                        
+                        <div class="bg-slate-800 text-blue-400 p-4 rounded-xl font-mono text-base mb-6 text-center shadow-inner font-bold tracking-wide">
+                            Size = Rate × Depth × Channels × Time
+                        </div>
+                        
+                        <div class="space-y-5 flex-1">
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="text-sm font-bold text-slate-700 block mb-1" data-i18n="sampleRateLabelCalc">Sample Rate (Hz)</label>
+                                    <select id="calcAudR" class="w-full border border-slate-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white shadow-sm cursor-pointer">
+                                        <option value="8000">8,000 Hz (Telephone)</option>
+                                        <option value="22050">22,050 Hz (Radio)</option>
+                                        <option value="44100" selected>44,100 Hz (CD)</option>
+                                        <option value="48000">48,000 Hz (DVD)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="text-sm font-bold text-slate-700 block mb-1" data-i18n="bitDepthLabelCalc">Bit Depth</label>
+                                    <select id="calcAudD" class="w-full border border-slate-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white shadow-sm cursor-pointer">
+                                        <option value="8">8-bit</option>
+                                        <option value="16" selected>16-bit</option>
+                                        <option value="24">24-bit</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="text-sm font-bold text-slate-700 block mb-1" data-i18n="channels">Channels</label>
+                                    <select id="calcAudC" class="w-full border border-slate-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white shadow-sm cursor-pointer">
+                                        <option value="1">1 (Mono)</option>
+                                        <option value="2" selected>2 (Stereo)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="text-sm font-bold text-slate-700 block mb-1" data-i18n="duration">Duration (Sec)</label>
+                                    <input type="number" id="calcAudT" value="60" class="w-full border border-slate-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all shadow-sm">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-6 p-6 bg-blue-50 border border-blue-200 rounded-xl text-center relative overflow-hidden shadow-sm">
+                            <div class="absolute top-0 left-0 w-1.5 h-full bg-blue-500"></div>
+                            <div class="text-sm text-blue-800 font-bold uppercase tracking-wider mb-2" data-i18n="uncompressedSize">Uncompressed Size</div>
+                            <div id="audResult" class="text-4xl font-black text-blue-700">10.09 MB</div>
+                            <div id="audBits" class="text-sm text-blue-600 mt-2 font-mono font-medium">84,672,000 bits</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Unit Conversion Note -->
+                <div class="mt-8 bg-slate-50 border border-slate-200 p-5 rounded-xl text-base text-slate-700 flex items-start gap-4 mb-6 shadow-sm">
+                    <i class="fa-solid fa-circle-info text-indigo-500 text-2xl mt-1"></i>
+                    <div>
+                        <strong class="text-indigo-800" data-i18n="unitNoteTitle">Note on Units:</strong> 
+                        <span data-i18n="unitNoteDesc">The formulas calculate the total number of <strong>bits</strong>. To convert to Bytes, divide by 8. To convert to Kilobytes (KB), divide by 1024. To convert to Megabytes (MB), divide by 1024 again.</span>
+                        <div class="font-mono text-sm mt-3 bg-white p-3 rounded-lg border border-slate-200 inline-block shadow-inner font-semibold text-slate-800">
+                            8 bits = 1 Byte (B) &nbsp;|&nbsp; 1024 B = 1 KB &nbsp;|&nbsp; 1024 KB = 1 MB
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Think Box -->
+                <div class="tip-box p-5 rounded-xl shadow-sm">
+                    <div class="flex gap-4">
+                        <div class="text-amber-500 text-2xl mt-1"><i class="fa-solid fa-compress"></i></div>
+                        <div>
+                            <h4 class="font-bold text-amber-800 mb-2" data-i18n="thinkBoxCalcTitle">Think & Discuss: The Storage Problem</h4>
+                            <p class="text-sm text-amber-900 mb-3" data-i18n="thinkBoxCalcDesc">
+                                A single 3-minute song uncompressed is over 30 MB. A 4K movie uncompressed would be hundreds of Gigabytes! How do streaming services like Netflix or Spotify manage to send this over the internet without using all your data?
+                            </p>
+                            <div class="bg-amber-100 p-2 rounded border border-amber-200 inline-block">
+                                <p class="text-sm text-amber-800 font-medium" data-i18n="thinkBoxCalcHint">
+                                    The answer lies in the "File Formats" tab. Let's learn about Compression!
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Formats Tab -->
+            <div id="formats" class="tab-content max-w-4xl mx-auto">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="bg-violet-100 p-3 rounded-xl text-violet-600"><i class="fa-solid fa-file-zipper text-2xl"></i></div>
+                    <h2 class="text-3xl font-bold text-slate-800" data-i18n="formatTitle">File Formats & Compression</h2>
+                </div>
+                
+                <p class="text-lg text-slate-600 mb-6" data-i18n="formatDesc">
+                    As seen in the calculator, uncompressed files (like BMP or WAV) are massive! To make files easier to store and download, we use <strong>Compression Algorithms</strong>. Different file formats use different types of compression.
+                </p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                    <!-- Lossless -->
+                    <div class="bg-white rounded-2xl border-2 border-emerald-200 shadow-md overflow-hidden flex flex-col hover:shadow-lg transition-shadow">
+                        <div class="bg-emerald-50 px-6 py-5 border-b border-emerald-100 flex items-center gap-4">
+                            <div class="bg-emerald-500 text-white w-10 h-10 rounded-full flex items-center justify-center text-lg shadow-sm"><i class="fa-solid fa-box-archive"></i></div>
+                            <h3 class="text-2xl font-bold text-emerald-800" data-i18n="losslessTitle">Lossless Compression</h3>
+                        </div>
+                        <div class="p-6 flex-1 flex flex-col">
+                            <p class="text-slate-700 text-base mb-6" data-i18n="losslessDesc">
+                                Reduces file size by finding mathematical patterns, <strong>without losing any original data</strong>. When uncompressed, the file is 100% identical to the original.
+                            </p>
+                            
+                            <div class="mb-6 flex-1">
+                                <h4 class="text-sm font-bold text-emerald-600 uppercase tracking-wider mb-3 border-b border-emerald-100 pb-1" data-i18n="prosCons">Pros & Cons</h4>
+                                <ul class="text-base text-slate-700 space-y-2">
+                                    <li class="flex items-start"><i class="fa-solid fa-check text-emerald-500 mt-1 mr-3"></i> <span data-i18n="losslessPro">Perfect quality retained</span></li>
+                                    <li class="flex items-start"><i class="fa-solid fa-xmark text-red-500 mt-1 mr-3"></i> <span data-i18n="losslessCon">File size is still relatively large</span></li>
+                                </ul>
+                            </div>
+                            
+                            <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                                <h4 class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-3" data-i18n="commonFormats">Common Formats</h4>
+                                <div class="flex flex-wrap gap-2">
+                                    <span class="px-3 py-1.5 bg-white text-emerald-700 rounded-lg text-sm font-bold border border-emerald-200 shadow-sm" title="Image">PNG</span>
+                                    <span class="px-3 py-1.5 bg-white text-emerald-700 rounded-lg text-sm font-bold border border-emerald-200 shadow-sm" title="Image">GIF</span>
+                                    <span class="px-3 py-1.5 bg-white text-emerald-700 rounded-lg text-sm font-bold border border-emerald-200 shadow-sm" title="Audio">FLAC</span>
+                                    <span class="px-3 py-1.5 bg-white text-emerald-700 rounded-lg text-sm font-bold border border-emerald-200 shadow-sm" title="Archive">ZIP</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Lossy -->
+                    <div class="bg-white rounded-2xl border-2 border-rose-200 shadow-md overflow-hidden flex flex-col hover:shadow-lg transition-shadow">
+                        <div class="bg-rose-50 px-6 py-5 border-b border-rose-100 flex items-center gap-4">
+                            <div class="bg-rose-500 text-white w-10 h-10 rounded-full flex items-center justify-center text-lg shadow-sm"><i class="fa-solid fa-scissors"></i></div>
+                            <h3 class="text-2xl font-bold text-rose-800" data-i18n="lossyTitle">Lossy Compression</h3>
+                        </div>
+                        <div class="p-6 flex-1 flex flex-col">
+                            <p class="text-slate-700 text-base mb-6" data-i18n="lossyDesc">
+                                Reduces file size by <strong>permanently discarding data</strong> that human eyes or ears are less likely to notice. The uncompressed file is an approximation of the original.
+                            </p>
+                            
+                            <div class="mb-6 flex-1">
+                                <h4 class="text-sm font-bold text-rose-600 uppercase tracking-wider mb-3 border-b border-rose-100 pb-1" data-i18n="prosCons">Pros & Cons</h4>
+                                <ul class="text-base text-slate-700 space-y-2">
+                                    <li class="flex items-start"><i class="fa-solid fa-check text-emerald-500 mt-1 mr-3"></i> <span data-i18n="lossyPro">Massive reduction in file size (great for web/streaming)</span></li>
+                                    <li class="flex items-start"><i class="fa-solid fa-xmark text-red-500 mt-1 mr-3"></i> <span data-i18n="lossyCon">Quality degrades, especially if re-saved multiple times</span></li>
+                                </ul>
+                            </div>
+                            
+                            <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                                <h4 class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-3" data-i18n="commonFormats">Common Formats</h4>
+                                <div class="flex flex-wrap gap-2">
+                                    <span class="px-3 py-1.5 bg-white text-rose-700 rounded-lg text-sm font-bold border border-rose-200 shadow-sm" title="Image">JPG / JPEG</span>
+                                    <span class="px-3 py-1.5 bg-white text-rose-700 rounded-lg text-sm font-bold border border-rose-200 shadow-sm" title="Audio">MP3</span>
+                                    <span class="px-3 py-1.5 bg-white text-rose-700 rounded-lg text-sm font-bold border border-rose-200 shadow-sm" title="Audio">AAC</span>
+                                    <span class="px-3 py-1.5 bg-white text-rose-700 rounded-lg text-sm font-bold border border-rose-200 shadow-sm" title="Video">MP4</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Uncompressed Formats Note -->
+                <div class="bg-slate-50 border border-slate-200 p-5 rounded-xl text-base text-slate-700 flex items-center gap-4 mb-6 shadow-sm">
+                    <i class="fa-solid fa-hard-drive text-slate-500 text-3xl"></i>
+                    <div>
+                        <strong class="text-slate-800 block mb-1" data-i18n="uncompressedNoteTitle">What about Uncompressed Formats?</strong> 
+                        <span data-i18n="uncompressedNoteDesc">Formats like <strong>BMP</strong> (Bitmap Images) and <strong>WAV</strong> (Waveform Audio) do not use compression. They store the raw data exactly as calculated in the previous tab. They offer the highest quality but take up the most disk space.</span>
+                    </div>
+                </div>
+
+                <!-- Think Box -->
+                <div class="tip-box p-5 rounded-xl shadow-sm">
+                    <div class="flex gap-4">
+                        <div class="text-amber-500 text-2xl mt-1"><i class="fa-solid fa-scale-balanced"></i></div>
+                        <div>
+                            <h4 class="font-bold text-amber-800 mb-2" data-i18n="thinkBoxFormatTitle">Think & Discuss: Making the Right Choice</h4>
+                            <p class="text-sm text-amber-900 mb-3" data-i18n="thinkBoxFormatDesc">
+                                If you are a professional photographer printing a huge billboard, which format type would you choose? What if you are a web designer creating a fast-loading website? 
+                            </p>
+                            <div class="bg-amber-100 p-3 rounded-lg border border-amber-200">
+                                <p class="text-sm text-amber-900 font-medium" data-i18n="thinkBoxFormatAns">
+                                    <strong>Conclusion:</strong> There is no "perfect" format. We must always balance <span class="highlight-text">Quality</span>, <span class="highlight-text">File Size</span>, and <span class="highlight-text">Purpose</span>!
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        // --- i18n Translation Dictionary ---
+        const translations = {
+            en: {
+                appTitle: "Multimedia Digitization", appSubtitle: "Bitmaps, Audio, and Compression", author: "Created by Sam Li",
+                navSection1: "Learning Path", navSection2: "Tools & Concepts",
+                navIntro: "Introduction", navAudio: "Audio Digitization", navImage: "Image Digitization", navCalc: "Size Calculator", navFormats: "File Formats",
+                
+                // Intro
+                introTitle: "What is Digitization?",
+                introP1: "Computers only understand binary data (0s and 1s). However, the real world is <strong>analog</strong>—continuous and infinite. For example, a violin string vibrates continuously, and a painted canvas has infinite variations of color. <strong>Digitization</strong> is the process of converting these continuous analog signals into discrete, finite digital numbers that a computer can store and process.",
+                twoSteps: "The Two Core Steps of Digitization",
+                sampling: "Sampling", samplingDesc: "Taking snapshots or measurements of the analog signal at regular intervals. This breaks a continuous signal into discrete pieces.",
+                samplingEx1: "<strong>Audio:</strong> Measuring sound waves over <span class=\"highlight-text\">time</span> (e.g., taking 44,100 measurements every second).",
+                samplingEx2: "<strong>Images:</strong> Dividing a picture into a grid of pixels over <span class=\"highlight-text\">space</span>.",
+                quantization: "Quantization", quantizationDesc: "Assigning a specific, discrete numerical value to each sample based on available bits. This rounds exact values to the nearest available step.",
+                quantEx1: "<strong>Audio:</strong> Rounding the exact sound wave amplitude to the nearest available level (Bit Depth).",
+                quantEx2: "<strong>Images:</strong> Assigning a specific binary code for a color out of a limited palette (Color Depth).",
+                bitPatternRule: "<strong>Rule of Bits:</strong> <span class=\"highlight-text\">n</span> bits can represent <span class=\"highlight-text\">2<sup>n</sup></span> different patterns or levels. (e.g., 8 bits = 2<sup>8</sup> = 256 levels).",
+                thinkBox1Title: "Think & Discuss: Information Loss",
+                thinkBox1Desc: "Since we are only taking \"snapshots\" (sampling) and \"rounding off\" values (quantization), is the digital version exactly the same as the original analog signal? What happens if we sample too slowly, or use too few bits for quantization?",
+                thinkBox1Hint: "Let's explore the next tabs (Audio & Image) to see the visual effects of changing these settings!",
+                
+                // Audio
+                audioTitle: "Audio Digitization", 
+                audioIntro: "Sound travels as continuous waves of air pressure. To store sound on a computer, we must measure the height (amplitude) of the wave at regular time intervals.",
+                sampleRateLabel: "Sampling Rate", sampleRateHelp: "How often we take a snapshot per second (Horizontal axis). Higher rate = captures faster changes in sound.",
+                bitDepthLabel: "Bit Depth (Quantization)", bitDepthHelp: "How many exact values are available to record the height (Vertical axis). Higher depth = more accurate volume levels.",
+                low: "Low (Fewer slices)", high: "High (More slices)",
+                analogWave: "Original Analog Wave", digitalSamples: "Digital Samples",
+                thinkBox2Title: "Student FAQ: Why not just set everything to maximum?",
+                thinkBox2Desc: "If higher sampling rates and bit depths make the digital wave look exactly like the original analog wave, why don't we just use infinite rates and depths to get perfect quality?",
+                thinkBox2Ans: "<strong>Answer: File Size!</strong> Every sample takes up bits. Higher rates = more samples per second. Higher bit depth = more bits used per sample. This leads to massive file sizes. We must find a balance between <span class=\"highlight-text\">Quality</span> and <span class=\"highlight-text\">Storage Space</span>.",
+                
+                // Image
+                imageTitle: "Image Digitization", 
+                imageIntro: "A real-world scene is continuous in space and color. To digitize an image, we place a grid over it (Sampling) and assign a single color value to each square, called a <strong>Pixel</strong> (Picture Element).",
+                resolutionLabel: "Resolution (Grid Size)", resolutionHelp: "Determines how many pixels make up the image (Spatial Sampling). More pixels = finer detail.",
+                pixelated: "Low (Pixelated)", clear: "High (Clear)",
+                colorDepthTitle: "What about Quantization?",
+                colorDepthDesc: "In images, quantization is called <strong>Color Depth (Bit Depth)</strong>. It determines how many bits are used to represent the color of a single pixel. <br><br><span class=\"highlight-text\">1-bit</span> = 2<sup>1</sup> = 2 colors (Black & White)<br><span class=\"highlight-text\">8-bit</span> = 2<sup>8</sup> = 256 colors<br><span class=\"highlight-text\">24-bit</span> = 2<sup>24</sup> = 16.7 million colors (True Color)",
+                imageSimCaption: "Procedurally generated gradient circle showing pixelation",
+                thinkBoxImageTitle: "Think & Discuss: Calculating the Cost of Quality",
+                thinkBoxImageDesc: "Imagine a modern smartphone photo. It might have a resolution of 4000 x 3000 pixels, and use 24-bit True Color. How many total bits is that?",
+                thinkBoxImageHint: "Let's head over to the \"File Size Calculator\" tab to find out exactly how to calculate this mathematically!",
+                
+                // Calc
+                calcTitle: "File Size Calculator", 
+                calcIntro: "Every digital sample requires bits to store. We can mathematically calculate the exact size of <strong>uncompressed</strong> raw data using simple formulas.",
+                imageCalc: "Bitmap Image Size", audioCalc: "Audio File Size",
+                width: "Width (px)", height: "Height (px)", colorDepthLabel: "Color Depth (bits per pixel)",
+                sampleRateLabelCalc: "Sample Rate (Hz)", bitDepthLabelCalc: "Bit Depth", channels: "Channels", duration: "Duration (Sec)",
+                uncompressedSize: "Uncompressed Size",
+                unitNoteTitle: "Note on Units:", unitNoteDesc: "The formulas calculate the total number of <strong>bits</strong>. To convert to Bytes, divide by 8. To convert to Kilobytes (KB), divide by 1024. To convert to Megabytes (MB), divide by 1024 again.",
+                thinkBoxCalcTitle: "Think & Discuss: The Storage Problem",
+                thinkBoxCalcDesc: "A single 3-minute song uncompressed is over 30 MB. A 4K movie uncompressed would be hundreds of Gigabytes! How do streaming services like Netflix or Spotify manage to send this over the internet without using all your data?",
+                thinkBoxCalcHint: "The answer lies in the \"File Formats\" tab. Let's learn about Compression!",
+                
+                // Formats
+                formatTitle: "File Formats & Compression", 
+                formatDesc: "As seen in the calculator, uncompressed files (like BMP or WAV) are massive! To make files easier to store and download, we use <strong>Compression Algorithms</strong>. Different file formats use different types of compression.",
+                losslessTitle: "Lossless Compression", losslessDesc: "Reduces file size by finding mathematical patterns, <strong>without losing any original data</strong>. When uncompressed, the file is 100% identical to the original.",
+                lossyTitle: "Lossy Compression", lossyDesc: "Reduces file size by <strong>permanently discarding data</strong> that human eyes or ears are less likely to notice. The uncompressed file is an approximation of the original.",
+                prosCons: "Pros & Cons", commonFormats: "Common Formats",
+                losslessPro: "Perfect quality retained", losslessCon: "File size is still relatively large",
+                lossyPro: "Massive reduction in file size (great for web/streaming)", lossyCon: "Quality degrades, especially if re-saved multiple times",
+                uncompressedNoteTitle: "What about Uncompressed Formats?", uncompressedNoteDesc: "Formats like <strong>BMP</strong> (Bitmap Images) and <strong>WAV</strong> (Waveform Audio) do not use compression. They store the raw data exactly as calculated in the previous tab. They offer the highest quality but take up the most disk space.",
+                thinkBoxFormatTitle: "Think & Discuss: Making the Right Choice",
+                thinkBoxFormatDesc: "If you are a professional photographer printing a huge billboard, which format type would you choose? What if you are a web designer creating a fast-loading website?",
+                thinkBoxFormatAns: "<strong>Conclusion:</strong> There is no \"perfect\" format. We must always balance <span class=\"highlight-text\">Quality</span>, <span class=\"highlight-text\">File Size</span>, and <span class=\"highlight-text\">Purpose</span>!"
+            },
+            zh: {
+                appTitle: "多媒體數碼化", appSubtitle: "點陣圖、聲音與壓縮", author: "Created by Sam Li",
+                navSection1: "學習路徑", navSection2: "工具與概念",
+                navIntro: "簡介", navAudio: "聲音數碼化", navImage: "圖像數碼化", navCalc: "檔案大小計算機", navFormats: "檔案格式",
+                
+                // Intro
+                introTitle: "什麼是數碼化？",
+                introP1: "電腦只理解二進制數據（0和1）。然而，現實世界是<strong>模擬 (Analog)</strong>的——連續且無限。例如，小提琴的琴弦連續振動，畫布上的顏色有無限的變化。<strong>數碼化 (Digitization)</strong>是將這些連續的模擬信號轉換為電腦可以儲存和處理的離散、有限的數字的過程。",
+                twoSteps: "數碼化的兩個核心步驟",
+                sampling: "採樣 (Sampling)", samplingDesc: "定期對模擬信號進行快照擷取或測量。這將連續的信號分解成離散的片段。",
+                samplingEx1: "<strong>聲音：</strong> 隨<span class=\"highlight-text\">時間</span>測量聲波（例如：每秒進行 44,100 次測量）。",
+                samplingEx2: "<strong>圖像：</strong> 在<span class=\"highlight-text\">空間</span>上將圖片劃分為像素網格。",
+                quantization: "量化 (Quantization)", quantizationDesc: "根據可用的位元數，為每個樣本分配一個特定的離散數值。這會將精確的數值四捨五入到最接近的可用階級。",
+                quantEx1: "<strong>聲音：</strong> 將精確的聲波振幅四捨五入到最接近的可用級別（位元深度 / Bit Depth）。",
+                quantEx2: "<strong>圖像：</strong> 從有限的調色板中為顏色分配特定的二進制代碼（顏色深度 / Color Depth）。",
+                bitPatternRule: "<strong>位元法則：</strong> <span class=\"highlight-text\">n</span> 個位元可以表示 <span class=\"highlight-text\">2<sup>n</sup></span> 種不同的組合或級別。（例如：8 bits = 2<sup>8</sup> = 256 個級別）。",
+                thinkBox1Title: "思考與討論：資訊流失",
+                thinkBox1Desc: "既然我們只是進行「快照」（採樣）和「四捨五入」（量化），數碼版本與原始的模擬信號完全一樣嗎？如果我們採樣太慢，或者使用太少的位元進行量化，會發生什麼事？",
+                thinkBox1Hint: "讓我們探索接下來的標籤頁（聲音與圖像），看看更改這些設定會產生什麼視覺效果！",
+                
+                // Audio
+                audioTitle: "聲音數碼化", 
+                audioIntro: "聲音以連續的氣壓波形式傳播。為了在電腦上儲存聲音，我們必須定期測量波的高度（振幅）。",
+                sampleRateLabel: "採樣率 (Sampling Rate)", sampleRateHelp: "每秒擷取快照的次數（水平軸）。採樣率越高 = 越能捕捉聲音的快速變化。",
+                bitDepthLabel: "位元深度 / 量化 (Bit Depth)", bitDepthHelp: "有多少精確數值可用來記錄高度（垂直軸）。位元深度越高 = 音量級別越準確。",
+                low: "低 (較少切片/粗糙)", high: "高 (較多切片/平滑)",
+                analogWave: "原始模擬波 (Analog Wave)", digitalSamples: "數碼樣本 (Digital Samples)",
+                thinkBox2Title: "學生常見疑問：為什麼不把所有設定調到最高？",
+                thinkBox2Desc: "如果更高的採樣率和位元深度能讓數碼波看起來和原始模擬波完全一樣，為什麼我們不直接使用無限的採樣率和深度來獲得完美音質呢？",
+                thinkBox2Ans: "<strong>答案：檔案大小！</strong> 每個樣本都需要佔用位元。更高的採樣率 = 每秒更多樣本。更高的位元深度 = 每個樣本佔用更多位元。這會導致檔案變得非常龐大。我們必須在<span class=\"highlight-text\">品質</span>和<span class=\"highlight-text\">儲存空間</span>之間取得平衡。",
+                
+                // Image
+                imageTitle: "圖像數碼化", 
+                imageIntro: "現實世界的場景在空間和顏色上都是連續的。為了將圖像數碼化，我們在上面放置一個網格（採樣），並為每個方格分配單一顏色值，這稱為<strong>像素 (Pixel)</strong>。",
+                resolutionLabel: "解像度 (網格大小)", resolutionHelp: "決定圖像由多少個像素組成（空間採樣）。像素越多 = 細節越精細。",
+                pixelated: "低 (起格 / Pixelated)", clear: "高 (清晰)",
+                colorDepthTitle: "那圖像的量化呢？",
+                colorDepthDesc: "在圖像中，量化被稱為<strong>顏色深度 (Color Depth / Bit Depth)</strong>。它決定了使用多少個位元來表示單一像素的顏色。<br><br><span class=\"highlight-text\">1-bit</span> = 2<sup>1</sup> = 2 種顏色 (黑/白)<br><span class=\"highlight-text\">8-bit</span> = 2<sup>8</sup> = 256 種顏色<br><span class=\"highlight-text\">24-bit</span> = 2<sup>24</sup> = 1670萬種顏色 (真彩色 / True Color)",
+                imageSimCaption: "程式生成的漸變圓形，展示像素化效果",
+                thinkBoxImageTitle: "思考與討論：計算品質的代價",
+                thinkBoxImageDesc: "想像一張現代智能手機拍攝的照片。它的解像度可能是 4000 x 3000 像素，並使用 24-bit 真彩色。那總共是多少個位元（bits）呢？",
+                thinkBoxImageHint: "讓我們前往「檔案大小計算機」標籤頁，找出如何用數學準確計算！",
+                
+                // Calc
+                calcTitle: "檔案大小計算機", 
+                calcIntro: "每個數碼樣本都需要位元來儲存。我們可以使用簡單的公式，透過數學計算出<strong>未壓縮</strong>原始數據的確切大小。",
+                imageCalc: "點陣圖 (Bitmap) 大小", audioCalc: "聲音檔案大小",
+                width: "寬度 (px)", height: "高度 (px)", colorDepthLabel: "顏色深度 (bits per pixel)",
+                sampleRateLabelCalc: "採樣率 (Hz)", bitDepthLabelCalc: "位元深度 (Bit Depth)", channels: "聲道 (Channels)", duration: "時間長度 (秒)",
+                uncompressedSize: "未壓縮檔案大小",
+                unitNoteTitle: "單位注意事項：", unitNoteDesc: "公式計算出的是<strong>位元 (bits)</strong> 的總數。要轉換為字節 (Bytes)，請除以 8。要轉換為千字節 (KB)，請除以 1024。要轉換為兆字節 (MB)，請再除以 1024。",
+                thinkBoxCalcTitle: "思考與討論：儲存空間的煩惱",
+                thinkBoxCalcDesc: "一首 3 分鐘的未壓縮歌曲超過 30 MB。一部未壓縮的 4K 電影將高達數百 GB！Netflix 或 Spotify 等串流服務是如何在不耗盡你所有數據用量的情況下，透過網絡傳送這些內容的？",
+                thinkBoxCalcHint: "答案就在「檔案格式」標籤頁中。讓我們來學習壓縮技術！",
+                
+                // Formats
+                formatTitle: "檔案格式與壓縮", 
+                formatDesc: "正如在計算機中看到的，未壓縮的檔案（如 BMP 或 WAV）非常巨大！為了讓檔案更容易儲存和下載，我們使用<strong>壓縮演算法 (Compression Algorithms)</strong>。不同的檔案格式使用不同類型的壓縮。",
+                losslessTitle: "無損壓縮 (Lossless Compression)", losslessDesc: "透過尋找數學規律來縮小檔案大小，<strong>不會流失任何原始數據</strong>。解壓縮後，檔案與原始檔案 100% 相同。",
+                lossyTitle: "有損壓縮 (Lossy Compression)", lossyDesc: "透過<strong>永久捨棄</strong>人類眼睛或耳朵較難察覺的數據來縮小檔案大小。解壓縮後的檔案只是原始檔案的近似值。",
+                prosCons: "優點與缺點", commonFormats: "常見格式",
+                losslessPro: "保留完美畫質/音質", losslessCon: "檔案大小仍然相對較大",
+                lossyPro: "大幅縮小檔案大小（非常適合網頁/串流）", lossyCon: "品質會下降，特別是多次重新儲存後",
+                uncompressedNoteTitle: "那未壓縮格式呢？", uncompressedNoteDesc: "像 <strong>BMP</strong>（點陣圖）和 <strong>WAV</strong>（波形聲音）等格式不使用壓縮。它們完全按照上一個標籤頁中計算的方式儲存原始數據。它們提供最高的品質，但佔用最多的磁碟空間。",
+                thinkBoxFormatTitle: "思考與討論：做出正確的選擇",
+                thinkBoxFormatDesc: "如果你是一位專業攝影師，要列印一張巨大的廣告牌，你會選擇哪種格式？如果你是一位網頁設計師，正在製作一個需要快速載入的網站呢？",
+                thinkBoxFormatAns: "<strong>結論：</strong> 沒有「完美」的格式。我們必須始終在<span class=\"highlight-text\">品質</span>、<span class=\"highlight-text\">檔案大小</span>和<span class=\"highlight-text\">用途</span>之間取得平衡！"
+            }
+        };
+
+        let currentLang = 'en';
+
+        function toggleLanguage() {
+            currentLang = currentLang === 'en' ? 'zh' : 'en';
+            document.getElementById('langBtn').innerText = currentLang === 'en' ? 'English' : '中文';
+            
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (translations[currentLang][key]) {
+                    el.innerHTML = translations[currentLang][key];
+                }
+            });
+
+            // Update dynamically generated text
+            document.getElementById('srValue').innerText = document.getElementById('audioSampleRate').value + ' Hz';
+            document.getElementById('bdValue').innerText = document.getElementById('audioBitDepth').value + (currentLang === 'en' ? ' Levels' : ' 級別');
+            
+            // Re-trigger calculations to update labels if needed
+            calcSizes();
+        }
+
+        // --- Tab Switching ---
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => {
+                el.classList.remove('active', 'bg-indigo-50', 'text-indigo-700', 'border-indigo-600');
+                el.classList.add('text-slate-600', 'border-transparent');
+                
+                // Reset icon colors
+                const iconContainer = el.querySelector('div');
+                iconContainer.classList.remove('bg-indigo-100', 'text-indigo-600');
+                iconContainer.classList.add('bg-slate-200', 'text-slate-500');
+            });
+            
+            document.getElementById(tabId).classList.add('active');
+            const activeBtn = event.currentTarget;
+            activeBtn.classList.remove('text-slate-600', 'border-transparent');
+            activeBtn.classList.add('active', 'bg-indigo-50', 'text-indigo-700', 'border-indigo-600');
+            
+            // Set active icon color
+            const activeIconContainer = activeBtn.querySelector('div');
+            activeIconContainer.classList.remove('bg-slate-200', 'text-slate-500');
+            activeIconContainer.classList.add('bg-indigo-100', 'text-indigo-600');
+
+            if(tabId === 'audio') setTimeout(drawAudio, 50);
+            if(tabId === 'image') setTimeout(drawImage, 50);
+        }
+
+        // --- Audio Simulation ---
+        const aCanvas = document.getElementById('audioCanvas');
+        const aCtx = aCanvas.getContext('2d');
+        const aRate = document.getElementById('audioSampleRate');
+        const aDepth = document.getElementById('audioBitDepth');
+
+        function drawAudio() {
+            // Fix canvas resolution for clear rendering
+            const rect = aCanvas.getBoundingClientRect();
+            if(rect.width > 0) {
+                aCanvas.width = rect.width;
+                aCanvas.height = rect.height;
+            }
+
+            aCtx.clearRect(0, 0, aCanvas.width, aCanvas.height);
+            const w = aCanvas.width; const h = aCanvas.height;
+            const rate = parseInt(aRate.value);
+            const depth = parseInt(aDepth.value);
+            
+            document.getElementById('srValue').innerText = rate + ' Hz';
+            document.getElementById('bdValue').innerText = depth + (currentLang === 'en' ? ' Levels' : ' 級別');
+            
+            // Draw grid lines (Quantization levels)
+            aCtx.strokeStyle = 'rgba(255,255,255,0.1)';
+            aCtx.lineWidth = 1;
+            const stepY = (h*0.8) / depth;
+            for(let i=0; i<=depth; i++) {
+                let y = h*0.1 + i*stepY;
+                aCtx.beginPath(); aCtx.moveTo(0, y); aCtx.lineTo(w, y); aCtx.stroke();
+            }
+
+            // Draw Analog (Red)
+            aCtx.beginPath();
+            aCtx.strokeStyle = 'rgba(239, 68, 68, 0.9)'; // Tailwind red-500
+            aCtx.lineWidth = 3;
+            for(let x=0; x<w; x++) {
+                let y = h/2 + Math.sin(x * 0.03) * (h*0.35);
+                x===0 ? aCtx.moveTo(x, y) : aCtx.lineTo(x, y);
+            }
+            aCtx.stroke();
+
+            // Draw Digital Samples (Green)
+            aCtx.fillStyle = 'rgba(52, 211, 153, 0.75)'; // Tailwind emerald-400
+            const stepX = w / rate;
+            
+            for(let i=0; i<rate; i++) {
+                let x = i * stepX;
+                let exactY = h/2 + Math.sin(x * 0.03) * (h*0.35);
+                
+                // Quantize Y (snap to nearest grid line)
+                let relativeY = exactY - h*0.1;
+                let qY = h*0.1 + Math.round(relativeY / stepY) * stepY;
+                
+                // Draw sample bar
+                let barWidth = Math.max(2, stepX - 2);
+                let barHeight = h/2 - qY;
+                
+                aCtx.fillRect(x + 1, qY, barWidth, barHeight > 0 ? barHeight : 0);
+                if(barHeight < 0) {
+                    aCtx.fillRect(x + 1, h/2, barWidth, -barHeight);
+                }
+                
+                // Draw sample point
+                aCtx.beginPath();
+                aCtx.arc(x + barWidth/2 + 1, qY, 4, 0, Math.PI*2);
+                aCtx.fillStyle = '#10b981';
+                aCtx.fill();
+                aCtx.strokeStyle = '#fff';
+                aCtx.lineWidth = 1;
+                aCtx.stroke();
+                aCtx.fillStyle = 'rgba(52, 211, 153, 0.75)'; // Reset for next bar
+            }
+            
+            // Draw center line
+            aCtx.beginPath();
+            aCtx.strokeStyle = 'rgba(255,255,255,0.4)';
+            aCtx.moveTo(0, h/2); aCtx.lineTo(w, h/2);
+            aCtx.stroke();
+        }
+        aRate.addEventListener('input', drawAudio);
+        aDepth.addEventListener('input', drawAudio);
+        window.addEventListener('resize', () => { if(document.getElementById('audio').classList.contains('active')) drawAudio(); });
+
+        // --- Image Simulation ---
+        const iCanvas = document.getElementById('imageCanvas');
+        const iCtx = iCanvas.getContext('2d');
+        const iRes = document.getElementById('imageRes');
+
+        function drawImage() {
+            const res = parseInt(iRes.value);
+            document.getElementById('resValue').innerText = `${res} x ${res}`;
+            
+            const size = iCanvas.width;
+            const pixelSize = size / res;
+            
+            iCtx.clearRect(0, 0, size, size);
+            
+            // Draw procedural image
+            for(let y=0; y<res; y++) {
+                for(let x=0; x<res; x++) {
+                    // Center coordinates
+                    let cx = x - res/2 + 0.5; 
+                    let cy = y - res/2 + 0.5;
+                    let dist = Math.sqrt(cx*cx + cy*cy);
+                    let maxDist = res/2;
+                    
+                    // Create a colorful pattern (sunset-like circle)
+                    if(dist < maxDist) {
+                        let intensity = 1 - (dist/maxDist);
+                        let r = 255;
+                        let g = Math.floor(intensity * 200);
+                        let b = Math.floor((1-intensity) * 100);
+                        iCtx.fillStyle = `rgb(${r}, ${g}, ${b})`;
+                    } else {
+                        // Background gradient
+                        let bgVal = Math.floor(240 - (y/res)*40);
+                        iCtx.fillStyle = `rgb(${bgVal}, ${bgVal}, ${bgVal+15})`;
+                    }
+                    
+                    iCtx.fillRect(x*pixelSize, y*pixelSize, Math.ceil(pixelSize), Math.ceil(pixelSize)); // Math.ceil prevents gaps
+                }
+            }
+            
+            // Draw grid lines if resolution is low enough to see them clearly
+            if(res <= 32) {
+                iCtx.strokeStyle = 'rgba(0,0,0,0.15)';
+                iCtx.lineWidth = 0.5;
+                for(let i=0; i<=res; i++) {
+                    iCtx.beginPath(); iCtx.moveTo(i*pixelSize, 0); iCtx.lineTo(i*pixelSize, size); iCtx.stroke();
+                    iCtx.beginPath(); iCtx.moveTo(0, i*pixelSize); iCtx.lineTo(size, i*pixelSize); iCtx.stroke();
+                }
+            }
+        }
+        iRes.addEventListener('input', drawImage);
+
+        // --- Calculators ---
+        function formatBytes(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function calcSizes() {
+            // Image
+            let iw = parseInt(document.getElementById('calcImgW').value) || 0;
+            let ih = parseInt(document.getElementById('calcImgH').value) || 0;
+            let id = parseInt(document.getElementById('calcImgD').value) || 0;
+            let imgBits = iw * ih * id;
+            document.getElementById('imgResult').innerText = formatBytes(imgBits / 8);
+            document.getElementById('imgBits').innerText = imgBits.toLocaleString() + ' bits';
+
+            // Audio
+            let ar = parseInt(document.getElementById('calcAudR').value) || 0;
+            let ad = parseInt(document.getElementById('calcAudD').value) || 0;
+            let ac = parseInt(document.getElementById('calcAudC').value) || 0;
+            let at = parseInt(document.getElementById('calcAudT').value) || 0;
+            let audBits = ar * ad * ac * at;
+            document.getElementById('audResult').innerText = formatBytes(audBits / 8);
+            document.getElementById('audBits').innerText = audBits.toLocaleString() + ' bits';
+        }
+        
+        ['calcImgW','calcImgH','calcImgD','calcAudR','calcAudD','calcAudC','calcAudT'].forEach(id => {
+            document.getElementById(id).addEventListener('input', calcSizes);
+        });
+
+        // Initialize
+        setTimeout(() => {
+            calcSizes();
+            drawAudio();
+            drawImage();
+        }, 100);
+    </script>
+</body>
+</html>
